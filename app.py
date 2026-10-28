@@ -10,9 +10,8 @@ def generate_cards(excel_file, uploaded_images, template_file):
     # 1. قراءة ملف البيانات
     df = pd.read_excel(excel_file)
     
-    # 2. فتح قالب الباوربوينت المجمع (الذي يحتوي على 8 كروت)
+    # 2. فتح قالب الباوربوينت المجمع
     prs = Presentation(template_file)
-    blank_slide_layout = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[0]
     
     # تحويل الصور المرفوعة إلى قاموس للبحث السريع بالـ ID
     images_dict = {}
@@ -34,7 +33,10 @@ def generate_cards(excel_file, uploaded_images, template_file):
         {"img_left": Inches(7.68), "img_top": Inches(3.95), "txt_left": Inches(7.4), "txt_top": Inches(5.3)}
     ]
 
-    # حذف الشريحة الأولى الافتراضية الفارغة تماماً للبدء من جديد بالنسخ النظيفة
+    # حفظ نسخة من الملف الأساسي لاستخدامها كقالب نظيف مكرر
+    template_bytes = template_file.getvalue()
+    
+    # تفريغ شرائح الملف الحالي لإنشائها بشكل ديناميكي من جديد
     for i in range(len(prs.slides)-1, -1, -1):
         rId = prs.slides._sldIdLst[i].rId
         prs.part.drop_rel(rId)
@@ -46,16 +48,26 @@ def generate_cards(excel_file, uploaded_images, template_file):
         # تحديد موقع الكارت الحالي داخل الشريحة (من 0 إلى 7)
         card_index = index % 8
         
-        # إنشاء شريحة جديدة مجمعة عند البداية أو كل 8 موظفين
+        # إنشاء شريحة جديدة مجمعة عند البداية أو كلما امتلأت الشريحة بـ 8 موظفين
         if card_index == 0:
-            prs_temp = Presentation(template_file)
-            current_slide = prs.slides.add_slide(blank_slide_layout)
-            # نسخ الخلفية والتصميم الأساسي للـ 8 كروت من القالب
+            prs_temp = Presentation(BytesIO(template_bytes))
+            # أخذ الشريحة الأولى الجاهزة من الملف الأصلي وإضافتها
+            slide_layout = prs_temp.slides[0].slide_layout
+            current_slide = prs.slides.add_slide(slide_layout)
+            
+            # نسخ كافة الأشكال والخلفيات من الشريحة الأصلية بشكل آمن
             for shape in prs_temp.slides[0].shapes:
-                if shape.has_picture:
-                    current_slide.shapes.add_picture(template_file, shape.left, shape.top, shape.width, shape.height)
+                try:
+                    if shape.name.startswith('Picture') or hasattr(shape, 'image'):
+                        # استخراج الصورة وإعادة تركيبها في الشريحة الجديدة بنفس الإحداثيات
+                        img_stream = BytesIO(shape.image.bytes)
+                        current_slide.shapes.add_picture(img_stream, shape.left, shape.top, shape.width, shape.height)
+                except:
+                    continue
 
-        emp_id = str(row['ID']).strip().split('.')[0]
+        # استخراج الـ ID والاسم وتفادي مشاكل الفاصلة العشرية في أرقام الـ ID
+        raw_id = str(row['ID']).strip()
+        emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
         emp_name = str(row['Name']).strip()
         
         pos = card_positions[card_index]
@@ -66,7 +78,7 @@ def generate_cards(excel_file, uploaded_images, template_file):
             img_file.seek(0)
             current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.4), height=Inches(1.7))
         
-        # 2. إضافة النص المنسق (الاسم ورقم الـ ID فقط باللون الأحمر)
+        # 2. إضافة النص المنسق (الاسم باللون الأزرق ورقم الـ ID باللون الأحمر)
         txBox = current_slide.shapes.add_textbox(pos["txt_left"], pos["txt_top"], Inches(2.0), Inches(0.8))
         tf = txBox.text_frame
         tf.word_wrap = True
@@ -76,7 +88,7 @@ def generate_cards(excel_file, uploaded_images, template_file):
         # سطر اسم الموظف باللون الأزرق لشركة Xceed
         p_name = tf.paragraphs[0]
         p_name.text = emp_name
-        p_name.font.size = Pt(12)
+        p_name.font.size = Pt(11)
         p_name.font.bold = True
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)  # لون أزرق مطابق للشعار
