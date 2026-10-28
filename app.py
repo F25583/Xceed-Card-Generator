@@ -11,16 +11,16 @@ def generate_cards(excel_file, uploaded_images, template_file):
     
     # فتح قالب الباوربوينت الفارغ
     prs = Presentation(template_file)
-    blank_slide_layout = prs.slide_layouts # شريحة فارغة تماماً
+    blank_slide_layout = prs.slide_layouts[6] # شريحة فارغة تماماً لتجنب النصوص التلقائية
     
     # تحويل الصور المرفوعة إلى قاموس ليسهل البحث عنها بالـ ID
     images_dict = {}
     for img in uploaded_images:
-        name_without_ext = os.path.splitext(img.name)
+        name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
     for index, row in df.iterrows():
-        emp_id = str(row['ID']).strip().split('.') # إزالة الكسور إن وجدت
+        emp_id = str(row['ID']).strip().split('.')[0] # إزالة الكسور أو النقط الزائدة إن وجدت
         emp_name = str(row['Name']).strip()
         
         # إنشاء شريحة جديدة لكل موظف
@@ -35,14 +35,14 @@ def generate_cards(excel_file, uploaded_images, template_file):
             img_file = images_dict[emp_id]
             img_file.seek(0)
             # المقاسات ومكان الصورة (يمكنك تعديلها بالبوصة حسب رغبتك)
-            slide.shapes.add_picture(img_file, Inches(1.5), Inches(2.0), width=Inches(2.5), height=Inches(3.2))
+            slide.shapes.add_picture(img_file, Inches(1.5), Inches(2.0), width=Inches(2.5), height=3.2)
         
         # 3. إضافة النصوص فوق التصميم
         # اسم الموظف
         txBox_name = slide.shapes.add_textbox(Inches(0.5), Inches(5.5), Inches(4.5), Inches(0.5))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
-        p_name = tf_name.paragraphs
+        p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
         p_name.font.size = Pt(22)
         p_name.font.bold = True
@@ -51,7 +51,7 @@ def generate_cards(excel_file, uploaded_images, template_file):
         # الرقم التعريفي ID
         txBox_id = slide.shapes.add_textbox(Inches(0.5), Inches(6.1), Inches(4.5), Inches(0.5))
         tf_id = txBox_id.text_frame
-        p_id = tf_id.paragraphs
+        p_id = tf_id.paragraphs[0]
         p_id.text = f"ID: {emp_id}"
         p_id.font.size = Pt(18)
         p_id.font.name = 'Arial'
