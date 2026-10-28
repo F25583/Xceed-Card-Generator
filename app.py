@@ -7,36 +7,32 @@ import streamlit as st
 from io import BytesIO
 
 def generate_cards(excel_file, uploaded_images, template_file):
-    # 1. قراءة ملف البيانات
     df = pd.read_excel(excel_file)
-    
-    # 2. فتح قالب الباوربوينت المجمع
     prs = Presentation(template_file)
     
-    # تحويل الصور المرفوعة إلى قاموس للبحث السريع بالـ ID
     images_dict = {}
     for img in uploaded_images:
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # تحديد إحداثيات وأماكن الكروت الثمانية بدقة داخل الشريحة (بالبوصة Inches)
+    # 📌 التوزيع الدقيق والجديد بالملي لـ 8 كروت داخل الصفحة بناءً على القالب المرفق:
+    # تم حساب المسافات لضمان سقوط الصورة والنص داخل الإطار الأزرق لكل كارت
     card_positions = [
-        # الصف الأول: كارت 1، 2، 3، 4
-        {"img_left": Inches(0.48), "img_top": Inches(0.85), "txt_left": Inches(0.2), "txt_top": Inches(2.2)},
-        {"img_left": Inches(2.88), "img_top": Inches(0.85), "txt_left": Inches(2.6), "txt_top": Inches(2.2)},
-        {"img_left": Inches(5.28), "img_top": Inches(0.85), "txt_left": Inches(5.0), "txt_top": Inches(2.2)},
-        {"img_left": Inches(7.68), "img_top": Inches(0.85), "txt_left": Inches(7.4), "txt_top": Inches(2.2)},
-        # الصف الثاني: كارت 5، 6، 7، 8
-        {"img_left": Inches(0.48), "img_top": Inches(3.95), "txt_left": Inches(0.2), "txt_top": Inches(5.3)},
-        {"img_left": Inches(2.88), "img_top": Inches(3.95), "txt_left": Inches(2.6), "txt_top": Inches(5.3)},
-        {"img_left": Inches(5.28), "img_top": Inches(3.95), "txt_left": Inches(5.0), "txt_top": Inches(5.3)},
-        {"img_left": Inches(7.68), "img_top": Inches(3.95), "txt_left": Inches(7.4), "txt_top": Inches(5.3)}
+        # الصف الأول (من اليسار إلى اليمين)
+        {"img_left": Inches(0.48), "img_top": Inches(0.95), "txt_left": Inches(0.25), "txt_top": Inches(2.7)},
+        {"img_left": Inches(2.88), "img_top": Inches(0.95), "txt_left": Inches(2.65), "txt_top": Inches(2.7)},
+        {"img_left": Inches(5.28), "img_top": Inches(0.95), "txt_left": Inches(5.05), "txt_top": Inches(2.7)},
+        {"img_left": Inches(7.68), "img_top": Inches(0.95), "txt_left": Inches(7.45), "txt_top": Inches(2.7)},
+        # الصف الثاني (من اليسار إلى اليمين)
+        {"img_left": Inches(0.48), "img_top": Inches(4.35), "txt_left": Inches(0.25), "txt_top": Inches(6.1)},
+        {"img_left": Inches(2.88), "img_top": Inches(4.35), "txt_left": Inches(2.65), "txt_top": Inches(6.1)},
+        {"img_left": Inches(5.28), "img_top": Inches(4.35), "txt_left": Inches(5.05), "txt_top": Inches(6.1)},
+        {"img_left": Inches(7.68), "img_top": Inches(4.35), "txt_left": Inches(7.45), "txt_top": Inches(6.1)}
     ]
 
-    # حفظ نسخة من الملف الأساسي لاستخدامها كقالب نظيف مكرر
     template_bytes = template_file.getvalue()
     
-    # تفريغ شرائح الملف الحالي لإنشائها بشكل ديناميكي من جديد
+    # تنظيف وتفريغ الشرائح الافتراضية
     for i in range(len(prs.slides)-1, -1, -1):
         rId = prs.slides._sldIdLst[i].rId
         prs.part.drop_rel(rId)
@@ -45,64 +41,70 @@ def generate_cards(excel_file, uploaded_images, template_file):
     current_slide = None
 
     for index, row in df.iterrows():
-        # تحديد موقع الكارت الحالي داخل الشريحة (من 0 إلى 7)
         card_index = index % 8
         
-        # إنشاء شريحة جديدة مجمعة عند البداية أو كلما امتلأت الشريحة بـ 8 موظفين
         if card_index == 0:
+            # فتح نسخة نظيفة ومستقلة لكل شريحة مجمعة تحتوي على الـ 8 كروت كخلفية ثابتة
             prs_temp = Presentation(BytesIO(template_bytes))
-            # أخذ الشريحة الأولى الجاهزة من الملف الأصلي وإضافتها
-            slide_layout = prs_temp.slides[0].slide_layout
+            slide_layout = prs_temp.slide_layouts[0]
             current_slide = prs.slides.add_slide(slide_layout)
             
-            # نسخ كافة الأشكال والخلفيات من الشريحة الأصلية بشكل آمن
+            # نسخ جميع التصميمات الهندسية والخلفيات الأصلية لضمان ظهور الكروت الزرقاء الفارغة
             for shape in prs_temp.slides[0].shapes:
                 try:
                     if shape.name.startswith('Picture') or hasattr(shape, 'image'):
-                        # استخراج الصورة وإعادة تركيبها في الشريحة الجديدة بنفس الإحداثيات
                         img_stream = BytesIO(shape.image.bytes)
                         current_slide.shapes.add_picture(img_stream, shape.left, shape.top, shape.width, shape.height)
+                    elif shape.has_table or shape.has_chart:
+                        continue
+                    else:
+                        # نسخ الأشكال التلقائية الأخرى إن وجدت
+                        el = shape.element
+                        import copy
+                        new_el = copy.deepcopy(el)
+                        current_slide.shapes._spTree.append(new_el)
                 except:
                     continue
 
-        # استخراج الـ ID والاسم وتفادي مشاكل الفاصلة العشرية في أرقام الـ ID
         raw_id = str(row['ID']).strip()
         emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
         emp_name = str(row['Name']).strip()
         
         pos = card_positions[card_index]
         
-        # 1. إضافة صورة الموظف داخل الكارت الخاص به
+        # 1. إسقاط صورة الموظف وضبطها لتتوسط الجزء العلوي من الكارت (العرض 1.3 والارتفاع 1.6 بوصة)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
-            current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.4), height=Inches(1.7))
+            current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.3), height=Inches(1.6))
         
-        # 2. إضافة النص المنسق (الاسم باللون الأزرق ورقم الـ ID باللون الأحمر)
-        txBox = current_slide.shapes.add_textbox(pos["txt_left"], pos["txt_top"], Inches(2.0), Inches(0.8))
+        # 2. إسقاط وتنسيق النصوص (الاسم والـ ID فقط باللون الأحمر) لتتطابق مع البيانات
+        txBox = current_slide.shapes.add_textbox(pos["txt_left"], pos["txt_top"], Inches(1.8), Inches(0.7))
         tf = txBox.text_frame
         tf.word_wrap = True
         tf.margin_top = Inches(0)
+        tf.margin_left = Inches(0)
+        tf.margin_right = Inches(0)
         tf.margin_bottom = Inches(0)
         
-        # سطر اسم الموظف باللون الأزرق لشركة Xceed
+        # فقرة الاسم (اللون الأزرق لـ Xceed وحجم خط 10 ليناسب المساحة)
         p_name = tf.paragraphs[0]
         p_name.text = emp_name
-        p_name.font.size = Pt(11)
+        p_name.font.size = Pt(10)
         p_name.font.bold = True
         p_name.font.name = 'Arial'
-        p_name.font.color.rgb = RGBColor(0, 102, 204)  # لون أزرق مطابق للشعار
+        p_name.font.color.rgb = RGBColor(0, 102, 204)
         
-        # سطر رقم الـ ID فقط (باللون الأحمر) ليأتي بجانب كلمة ID الموجودة في قالبك
+        # فقرة رقم الـ ID (باللون الأحمر الزاهي وحجم 10 ليسقط مباشرة بعد كلمة ID المطبوعة في قالبك)
         p_id = tf.add_paragraph()
+        p_id.space_before = Pt(4)
         run_num = p_id.add_run()
         run_num.text = emp_id
-        run_num.font.size = Pt(11)
+        run_num.font.size = Pt(10)
         run_num.font.bold = True
         run_num.font.name = 'Arial'
-        run_num.font.color.rgb = RGBColor(255, 0, 0)  # أرقام الـ ID باللون الأحمر تماماً
+        run_num.font.color.rgb = RGBColor(255, 0, 0)
 
-    # حفظ الملف في الذاكرة للتحميل عبر المتصفح
     output = BytesIO()
     prs.save(output)
     output.seek(0)
