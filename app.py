@@ -24,11 +24,11 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     prs.slide_width = Inches(7.5 * aspect_ratio) 
     
     # استدعاء مباشر ومستقر للتخطيط الفارغ القياسي
-    blank_layout = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[0]
+    blank_layout = prs.slide_layouts if len(prs.slide_layouts) > 6 else prs.slide_layouts
     
     images_dict = {}
     for img in uploaded_images:
-        name_without_ext = os.path.splitext(img.name)[0]
+        name_without_ext = os.path.splitext(img.name)
         images_dict[str(name_without_ext).strip()] = img
 
     # 📌 المقاسات النهائية المأخوذة حرفياً من لقطات الشاشة للـ Format Shape لكل عنصر:
@@ -65,7 +65,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
             current_slide.shapes.add_picture(template_image_file, Inches(0), Inches(0), width=prs.slide_width, height=prs.slide_height)
 
         raw_id = str(row['ID']).strip()
-        emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
+        emp_id = raw_id.split('.') if '.' in raw_id else raw_id
         
         full_name = str(row['Name']).strip().split()
         emp_name = " ".join(full_name[:2]) if len(full_name) >= 2 else " ".join(full_name)
@@ -84,7 +84,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         tf_name.word_wrap = True
         tf_name.margin_top = tf_name.margin_bottom = tf_name.margin_left = tf_name.margin_right = Inches(0)
         
-        p_name = tf_name.paragraphs[0]
+        p_name = tf_name.paragraphs
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
         p_name.font.size = Pt(14)
@@ -98,7 +98,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         tf_id.word_wrap = False
         tf_id.margin_top = tf_id.margin_bottom = tf_id.margin_left = tf_id.margin_right = Inches(0)
         
-        p_id = tf_id.paragraphs[0]
+        p_id = tf_id.paragraphs
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
         p_id.font.size = Pt(14)
@@ -114,24 +114,34 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 
-# 🔒 استهداف شامل ونهائي لكافة عناصر وقوائم وأزرار وعلامات Streamlit لإزالتها كلياً من العرض
+# 🔒 تدمير وحظر عناصر الإضافة الإضافية لـ Streamlit بالكامل وجعل الـ Body يغطي الشاشة بنسبة 100%
 st.markdown("""
     <style>
-    /* إخفاء القائمة العلوية وأزرار النشر والمطور */
-    #MainMenu {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    header {visibility: hidden !important;}
+    /* حظر القوائم والشاشات الرأسية والسفلية القياسية */
+    #MainMenu {visibility: hidden !important; display: none !important;}
+    footer {visibility: hidden !important; display: none !important;}
+    header {visibility: hidden !important; display: none !important;}
     .stAppDeployButton {display: none !important;}
     
-    /* إخفاء شريط الأدوات وعلامات التزيين الخلفية */
-    div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-    div[data-testid="stDecoration"] {display: none !important; visibility: hidden !important;}
+    /* تفكيك وحذف الشريط السفلي المضاف للمطور وعلامة الاستضافة تماماً */
+    [data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
+    [data-testid="stDecoration"] {display: none !important; visibility: hidden !important;}
+    .stViewerBadge {display: none !important; visibility: hidden !important;}
     
-    /* الحجب الصارم للأيقونات السفلية العائمة وأزرار المطور في المتصفحات المشتركة */
-    div.stViewerBadge {display: none !important; visibility: hidden !important;}
-    .st-emotion-cache-1wbqy5l {display: none !important;}
-    iframe[title="Managed Hosting Toolbar"] {display: none !important;}
-    #streamlit--manage-app-footer {display: none !important;}
+    /* استهداف كتل الإطارات الخارجية التابعة لمنصة إدارة خدمات السحابة والتحكم المتصفحي */
+    iframe, iframe[src*="streamlit.app"], .st-emotion-cache-1wbqy5l {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    #streamlit--manage-app-footer, [id*="streamlit--manage-app"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* فرض تنسيق العرض الكلي المستقل */
+    .block-container {
+        padding-bottom: 2rem !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
