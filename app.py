@@ -113,6 +113,19 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
+
+# 🔒 كود حقن CSS مخصص لإخفاء علامات التبويب والقائمة والبروفايل وحواف المطورين نهائياً
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stAppDeployButton {display: none !important;}
+    div[data-testid="stToolbar"] {visibility: hidden !important;}
+    div[data-testid="stDecoration"] {display: none !important;}
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("البرنامج الالي لطباعة كروت الموظفين")
 st.write("برجاء اضافة البيانات بشكل صحيح لاستخراج الكروت.")
 
