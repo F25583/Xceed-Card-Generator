@@ -23,15 +23,15 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     prs.slide_height = Inches(7.5) 
     prs.slide_width = Inches(7.5 * aspect_ratio) 
     
-    # استدعاء التخطيط القياسي الفارغ تماماً بشكل آمن وسريع لستريمليت
-    blank_layout = prs.slide_layouts
+    # استدعاء التخطيط الفارغ بشكل مباشر وصارم لتجنب أخطاء السيرفر نهائياً
+    blank_layout = prs.slide_layouts[6]
     
     images_dict = {}
     for img in uploaded_images:
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 الإحداثيات المصححة بالملي لتتطابق 100% مع شبكتك التوضيحية الزرقاء والسوداء:
+    # 📌 الإحداثيات المصححة والمغلقة بناءً على خطوط شبكتك التوضيحية الزرقاء والسوداء:
     # مقاس الصورة المعتمد والمطلوب: العرض = 1.22 بوصة، الارتفاع = 1.70 بوصة
     card_positions = [
         # ── الصف العلوي (الخطوط الزرقاء العلوية) ──
@@ -107,7 +107,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("تم ضبط الإحداثيات وتثبيتها بالكامل بناءً على خطوط الشبكة التوضيحية الأخيرة.")
+st.write("تم إصلاح التخطيط بالكامل وتثبيت العناصر بناءً على أبعاد شبكتك التوضيحية.")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
 uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
@@ -115,10 +115,10 @@ template_image = st.file_uploader("3. اختر صورة الاستمبة الف�
 
 if excel_file and uploaded_images and template_image:
     if st.button("توليد كروت الطباعة المجمعة", type="primary"):
-        with st.spinner("جاري مطابقة العناصر داخل إحداثيات شبكتك التوضيحية وبأعلى استقرار..."):
+        with st.spinner("جاري إسقاط وتطابق الصور بناءً على حسابات السنتر الجديد آلياً..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.success("تم توليد الملف النهائي بنجاح تام! 🎉")
+                st.success("تم توليد الملف النهائي بنجاح تام وبدون أخطاء! 🎉")
                 
                 st.download_button(
                     label="📥 تحميل ملف الباوربوينت الموزون بالشبكة التوضيحية",
