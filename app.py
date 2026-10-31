@@ -30,20 +30,18 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 الإحداثيات الموزونة بالملي بناءً على مسطرة الباوربوينت لتطابق الكروت تماماً:
-    w_scale = prs.slide_width / Inches(13.333)
-    
+    # 📌 الإحداثيات الثابتة والأصلية اللي كانت قريبة جداً مع تعديل ترحيل السنتر بالملي:
     card_positions = [
         # الصف العلوي (الكروت 1، 2، 3، 4)
-        {"img_left": Inches(0.85), "img_top": Inches(0.70), "name_left": Inches(0.40), "name_top": Inches(2.45), "id_left": Inches(1.48), "id_top": Inches(2.78)},
-        {"img_left": Inches(3.95), "img_top": Inches(0.70), "name_left": Inches(3.50), "name_top": Inches(2.45), "id_left": Inches(4.58), "id_top": Inches(2.78)},
-        {"img_left": Inches(7.05), "img_top": Inches(0.70), "name_left": Inches(6.60), "name_top": Inches(2.45), "id_left": Inches(7.68), "id_top": Inches(2.78)},
-        {"img_left": Inches(10.15), "img_top": Inches(0.70), "name_left": Inches(9.70), "name_top": Inches(2.45), "id_left": Inches(10.78), "id_top": Inches(2.78)},
+        {"img_left": Inches(0.50), "img_top": Inches(0.85), "name_left": Inches(0.20), "name_top": Inches(2.60), "id_left": Inches(1.15), "id_top": Inches(2.95)},
+        {"img_left": Inches(2.90), "img_top": Inches(0.85), "name_left": Inches(2.60), "name_top": Inches(2.60), "id_left": Inches(3.55), "id_top": Inches(2.95)},
+        {"img_left": Inches(5.30), "img_top": Inches(0.85), "name_left": Inches(5.00), "name_top": Inches(2.60), "id_left": Inches(5.95), "id_top": Inches(2.95)},
+        {"img_left": Inches(7.70), "img_top": Inches(0.85), "name_left": Inches(7.40), "name_top": Inches(2.60), "id_left": Inches(8.35), "id_top": Inches(2.95)},
         # الصف السفلي (الكروت 5، 6، 7، 8)
-        {"img_left": Inches(0.85), "img_top": Inches(4.35), "name_left": Inches(0.40), "name_top": Inches(6.10), "id_left": Inches(1.48), "id_top": Inches(6.43)},
-        {"img_left": Inches(3.95), "img_top": Inches(4.35), "name_left": Inches(3.50), "name_top": Inches(6.10), "id_left": Inches(4.58), "id_top": Inches(6.43)},
-        {"img_left": Inches(7.05), "img_top": Inches(4.35), "name_left": Inches(6.60), "name_top": Inches(6.10), "id_left": Inches(7.68), "id_top": Inches(6.43)},
-        {"img_left": Inches(10.15), "img_top": Inches(4.35), "name_left": Inches(9.70), "name_top": Inches(6.10), "id_left": Inches(10.78), "id_top": Inches(6.43)}
+        {"img_left": Inches(0.50), "img_top": Inches(4.25), "name_left": Inches(0.20), "name_top": Inches(6.00), "id_left": Inches(1.15), "id_top": Inches(6.35)},
+        {"img_left": Inches(2.90), "img_top": Inches(4.25), "name_left": Inches(2.60), "name_top": Inches(6.00), "id_left": Inches(3.55), "id_top": Inches(6.35)},
+        {"img_left": Inches(5.30), "img_top": Inches(4.25), "name_left": Inches(5.00), "name_top": Inches(6.00), "id_left": Inches(5.95), "id_top": Inches(6.35)},
+        {"img_left": Inches(7.70), "img_top": Inches(4.25), "name_left": Inches(7.40), "name_top": Inches(6.00), "id_left": Inches(8.35), "id_top": Inches(6.35)}
     ]
 
     current_slide = None
@@ -64,14 +62,14 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         
         pos = card_positions[card_index]
         
-        # 1. إضافة صورة الموظف (المقاس الثابت: الارتفاع 1.7 والعرض 1.22 بوصة) في المنتصف
+        # 1. إضافة صورة الموظف (المقاس المطلوب: 1.7 طول × 1.22 عرض)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
             current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
-        # 2. إضافة صندوق الاسم (منفصل وموسط بحجم خط 14 بلون أزرق)
-        txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(2.15), Inches(0.35))
+        # 2. إضافة صندوق الاسم (حجم 14 أزرق موسط ومستقل)
+        txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(2.35), Inches(0.35))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
         tf_name.margin_top = tf_name.margin_bottom = tf_name.margin_left = tf_name.margin_right = Inches(0)
@@ -84,8 +82,8 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
         
-        # 3. إضافة صندوق رقم الـ ID (منفصل تماماً بحجم خط 14 بلون أحمر يبدأ بعد النقطتين مباشرة)
-        txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(0.90), Inches(0.3))
+        # 3. إضافة صندوق الـ ID (حجم 14 أحمر مستقل ينزل أمام كلمة ID بالظبط)
+        txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(1.10), Inches(0.3))
         tf_id = txBox_id.text_frame
         tf_id.word_wrap = False
         tf_id.margin_top = tf_id.margin_bottom = tf_id.margin_left = tf_id.margin_right = Inches(0)
@@ -106,7 +104,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("قم برفع ملف البيانات والصور وصورة الاستمبة المجمعة ليقوم البرنامج بتوزيعها تلقائياً بالأبعاد المحددة تماماً.")
+st.write("قم برفع ملف البيانات والصور وصورة الاستمبة المجمعة ليقوم البرنامج بتوزيعها تلقائياً.")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
 uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
@@ -117,7 +115,7 @@ if excel_file and uploaded_images and template_image:
         with st.spinner("جاري التثبيت التلقائي والمحاذاة الشاملة للكروت..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.success("تم توليد الملف بالتنسيق النهائي المثالي وجاهز للتنزيل! 🎉")
+                st.success("تم توليد الملف بالتنسيق النهائي الموزون! 🎉")
                 
                 st.download_button(
                     label="📥 تحميل ملف الباوربوينت الجاهز للطباعة الفورية",
