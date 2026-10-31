@@ -9,35 +9,48 @@ from io import BytesIO
 from PIL import Image
 
 def generate_cards(excel_file, uploaded_images, template_image_file):
+    # 1. قراءة ملف البيانات
     df = pd.read_excel(excel_file)
     
+    # 2. قراءة أبعاد صورة الاستمبة المرفوعة تلقائياً لمنع التمطيط
     template_image_file.seek(0)
     pil_img = Image.open(template_image_file)
     img_width_px, img_height_px = pil_img.size
+    
     aspect_ratio = img_width_px / img_height_px
     
     prs = Presentation()
     prs.slide_height = Inches(7.5) 
     prs.slide_width = Inches(7.5 * aspect_ratio) 
     
-    blank_layout = prs.slide_layouts if len(prs.slide_layouts) > 6 else prs.slide_layouts
+    # استدعاء مباشر ومستقر للتخطيط الفارغ القياسي
+    blank_layout = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[0]
     
     images_dict = {}
     for img in uploaded_images:
-        name_without_ext = os.path.splitext(img.name)
+        name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
+    # 📌 المقاسات النهائية المأخوذة حرفياً من لقطات الشاشة للـ Format Shape لكل عنصر:
     card_positions = [
         # ─────── الصف العلوي (الأسماء عند 2.75 والـ ID عند 3.06) ───────
+        # كارت 1
         {"img_left": Inches(0.77), "img_top": Inches(1.01), "name_left": Inches(0.56), "name_top": Inches(2.75), "id_left": Inches(1.23), "id_top": Inches(3.06)}, 
+        # كارت 2
         {"img_left": Inches(3.11), "img_top": Inches(1.01), "name_left": Inches(2.86), "name_top": Inches(2.75), "id_left": Inches(3.60), "id_top": Inches(3.06)}, 
+        # كارت 3
         {"img_left": Inches(5.45), "img_top": Inches(1.01), "name_left": Inches(5.20), "name_top": Inches(2.75), "id_left": Inches(5.94), "id_top": Inches(3.06)}, 
+        # كارت 4
         {"img_left": Inches(7.79), "img_top": Inches(1.01), "name_left": Inches(7.54), "name_top": Inches(2.75), "id_left": Inches(8.28), "id_top": Inches(3.06)}, 
         
         # ─────── الصف السفلي (الأسماء عند 6.40 والـ ID عند 6.71) ───────
+        # كارت 5
         {"img_left": Inches(0.77), "img_top": Inches(4.66), "name_left": Inches(0.56), "name_top": Inches(6.40), "id_left": Inches(1.24), "id_top": Inches(6.71)}, 
+        # كارت 6
         {"img_left": Inches(3.15), "img_top": Inches(4.66), "name_left": Inches(2.90), "name_top": Inches(6.40), "id_left": Inches(3.59), "id_top": Inches(6.71)}, 
+        # كارت 7
         {"img_left": Inches(5.53), "img_top": Inches(4.66), "name_left": Inches(5.28), "name_top": Inches(6.40), "id_left": Inches(5.97), "id_top": Inches(6.71)}, 
+        # كارت 8
         {"img_left": Inches(7.91), "img_top": Inches(4.66), "name_left": Inches(7.66), "name_top": Inches(6.40), "id_left": Inches(8.35), "id_top": Inches(6.71)}  
     ]
 
@@ -52,18 +65,20 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
             current_slide.shapes.add_picture(template_image_file, Inches(0), Inches(0), width=prs.slide_width, height=prs.slide_height)
 
         raw_id = str(row['ID']).strip()
-        emp_id = raw_id.split('.') if '.' in raw_id else raw_id
+        emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
         
         full_name = str(row['Name']).strip().split()
         emp_name = " ".join(full_name[:2]) if len(full_name) >= 2 else " ".join(full_name)
         
         pos = card_positions[card_index]
         
+        # 1. إسقاط صورة الموظف بالمقاس الصارم (1.7 × 1.22 بوصة)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
             current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
+        # 2. إضافة صندوق الاسم (حجم 14 أزرق موسط ومتناسق وعرض 1.65 بوصة كصورتك)
         txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(1.65), Inches(0.23))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
@@ -77,6 +92,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
         
+        # 3. إضافة صندوق رقم الـ ID (حجم 14 أحمر يبدأ بدقة بعد نقطتي الـ :ID وعرض 0.95 بوصة كصورتك)
         txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(0.95), Inches(0.23))
         tf_id = txBox_id.text_frame
         tf_id.word_wrap = False
@@ -94,121 +110,28 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     prs.save(output)
     output.seek(0)
     return output
-# ==========================================
-# 🎨 واجهة مستخدم ستريمليت الاحترافية والمعدلة بالكامل
-# ==========================================
 
-# رابط مباشر ومستقر للوجو لمنع حدوث كسر في الصورة
-LOGO_URL = "https://githubusercontent.com"
+# واجهة مستخدم ستريمليت Streamlit
+st.set_page_config(page_title="Xceed Print Generator", layout="centered")
+st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
+st.write("النسخة النهائية المطلقة: تطابق رقمي كامل ومدروس مع قياسات الباوربوينت الحية.")
 
-st.markdown(f"""
-    <style>
-    /* محاذاة العناوين الرئيسية وتقليل الفراغات المزعجة */
-    .main-title {{
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #0b7bc1;
-        text-align: center;
-        font-weight: 700;
-        margin-top: 10px;
-        margin-bottom: 5px;
-        direction: rtl;
-    }}
-    .sub-title {{
-        text-align: center;
-        color: #666666;
-        font-size: 15px;
-        margin-bottom: 30px;
-        direction: rtl;
-    }}
-    /* تنسيق صناديق رفع الملفات بشكل منسق وجذاب */
-    .stFileUploader {{
-        background-color: #fcfdfe;
-        border: 2px dashed #bcdcfa;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }}
-    /* جعل أزرار التشغيل والتحميل تحتل مساحة واضحة وبلون هوية الشركة */
-    div.stButton > button:first-child {{
-        background-color: #0b7bc1;
-        color: white;
-        border-radius: 8px;
-        width: 100%;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 12px;
-        border: none;
-        box-shadow: 0px 4px 6px rgba(11,123,193,0.15);
-        transition: 0.3s ease;
-    }}
-    div.stButton > button:first-child:hover {{
-        background-color: #085e94;
-        box-shadow: 0px 4px 12px rgba(11,123,193,0.3);
-    }}
-    </style>
-""", unsafe_allow_html=True)
-
-# ─── شريط جانبي منسق للمساعدة (Sidebar) ───
-with st.sidebar:
-    try:
-        st.image(LOGO_URL, width=140)
-    except:
-        st.markdown("### 🪪 Xceed System")
-    st.markdown("<h5 style='text-align: center; color: #555; margin-top: -10px;'>لوحة التحكم الإدارية</h5>", unsafe_allow_html=True)
-    st.divider()
-    st.markdown("### 🛠️ دليل تشغيل المنظومة")
-    st.info("""
-    1. **بيانات الموظفين:** ملف Excel يحتوي على الأعمدة الأساسية `ID` و `Name`.
-    2. **الصور الشخصية:** رفع الصور معاً على أن يكون اسم الصورة مطابقاً للـ ID تماماً.
-    3. **قالب الخلفية:** رفع استمبة الكروت المجمعة الفارغة.
-    """)
-    st.divider()
-    st.caption("تطوير برمي ذكي © 2026 Xceed Print System")
-
-# ─── الواجهة الرئيسية للتطبيق ───
-# إظهار اللوجو الرئيسي في المنتصف بشكل صحيح
-col_logo1, col_logo2, col_logo3 = st.columns([1, 2, 1])
-with col_logo2:
-    try:
-        st.image(LOGO_URL, use_container_width=True)
-    except:
-        st.write("")
-
-st.markdown('<h1 class="main-title">منظومة طباعة كروت موظفي Xceed الآلية</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">توليد تلقائي متوازن هندسياً بمعدل 8 كروت مجمعة لكل شريحة طباعة</p>', unsafe_allow_html=True)
-
-st.subheader("📁 لوحة رفع الملفات المستندية")
-
-with st.container():
-    excel_file = st.file_uploader("📊 1. قاعدة بيانات الموظفين (ملف Excel):", type=["xlsx", "xls"])
-    uploaded_images = st.file_uploader("📸 2. الصور الشخصية للموظفين (يمكن رفع ملفات متعددة معاً):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
-    template_image = st.file_uploader("🖼️ 3. صورة الاستمبة الفارغة المجمعة (Template Background):", type=["jpg", "jpeg", "png"])
-
-st.divider()
+excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
+uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+template_image = st.file_uploader("3. اختر صورة الاستمبة الفارغة المجمعة (Template Image):", type=["jpg", "jpeg", "png"])
 
 if excel_file and uploaded_images and template_image:
-    c1, c2 = st.columns(2)
-    with c1:
-        st.metric(label="عدد الصور المرفوعة", value=f"{len(uploaded_images)} صورة")
-    with c2:
-        st.success("جميع المستندات جاهزة تماماً للمطابقة!")
-        
-    st.write("") 
-    
-    if st.button("⚡ بدء التوليد الفوري والمطابقة الموزونة", type="primary"):
-        with st.spinner("جاري صب البيانات وتطبيق هندسة تعويض الترحيل المحدثة..."):
+    if st.button("توليد كروت الطباعة المجمعة", type="primary"):
+        with st.spinner("جاري صب البيانات وتوليد الملف بأبعاد متناهية الدقة..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.balloons()
-                st.success("🎉 تم توليد الملف بنجاح وتطابق تام 100% مع أبعاد كروتك!")
+                st.success("تم التوليد بنجاح تام! الكود متطابق الآن مع ملف الباوربوينت الخاص بك بنسبة 100%. 🎉")
                 
                 st.download_button(
-                    label="📥 تحميل ملف الباوربوينت النهائي المصدر للطباعة",
+                    label="📥 تحميل ملف الباوربوينت المطابق تماماً",
                     data=result_pptx,
-                    file_name="Xceed_Final_Print_Ready.pptx",
+                    file_name="Xceed_Cards_Perfect_Match_Final.pptx",
                     mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 )
             except Exception as e:
-                st.error(f"⚠️ حدث خطأ أثناء المعالجة: {e}")
-else:
-    st.warning("📥 يرجى رفع كافة الملفات الثلاثة الموضحة أعلاه لتفعيل زر التوليد الآلي.")
+                st.error(f"حدث خطأ أثناء المعالجة: {e}")
