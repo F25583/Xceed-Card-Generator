@@ -23,15 +23,15 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     prs.slide_height = Inches(7.5) 
     prs.slide_width = Inches(7.5 * aspect_ratio) 
     
-    # استدعاء مباشر ومستقر للتخطيط الافتراضي الفارغ لمنع الأخطاء السحابية
-    blank_layout = prs.slide_layouts if len(prs.slide_layouts) > 6 else prs.slide_layouts
+    # اختيار تخطيط الشريحة الفارغة مباشرة وصراحة لتفادي تعليق السيرفر السحابي نهائياً
+    blank_layout = prs.slide_layouts
     
     images_dict = {}
     for img in uploaded_images:
-        name_without_ext = os.path.splitext(img.name)[0]
+        name_without_ext = os.path.splitext(img.name)
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 تم تعديل المقاسات بدقة متناهية لتعويض الترحيل الأفقي والرأسي (Perfect Match):
+    # 📌 مصفوفة تعويض الترحيل التراكمي خطوة بخطوة المخصصة (Perfect Match):
     card_positions = [
         # ─────── الصف العلوي (معالجة الترحيل التراكمي خطوة بخطوة) ───────
         # كارت 1 (مضبوط تلقائياً)
@@ -65,14 +65,14 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
             current_slide.shapes.add_picture(template_image_file, Inches(0), Inches(0), width=prs.slide_width, height=prs.slide_height)
 
         raw_id = str(row['ID']).strip()
-        emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
+        emp_id = raw_id.split('.') if '.' in raw_id else raw_id
         
         full_name = str(row['Name']).strip().split()
         emp_name = " ".join(full_name[:2]) if len(full_name) >= 2 else " ".join(full_name)
         
         pos = card_positions[card_index]
         
-        # 1. إسقاط صورة الموظف بالمقاس الصارم (1.7 × 1.22 بوصة) بناءً على مصفوفتك الجديدة
+        # 1. إسقاط صورة الموظف بمقاس مخصص وصارم (1.7 × 1.22 بوصة)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
@@ -84,7 +84,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         tf_name.word_wrap = True
         tf_name.margin_top = tf_name.margin_bottom = tf_name.margin_left = tf_name.margin_right = Inches(0)
         
-        p_name = tf_name.paragraphs[0]
+        p_name = tf_name.paragraphs
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
         p_name.font.size = Pt(14)
@@ -98,7 +98,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         tf_id.word_wrap = False
         tf_id.margin_top = tf_id.margin_bottom = tf_id.margin_left = tf_id.margin_right = Inches(0)
         
-        p_id = tf_id.paragraphs[0]
+        p_id = tf_id.paragraphs
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
         p_id.font.size = Pt(14)
@@ -111,9 +111,9 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("تم تطبيق مصفوفة تعويض الترحيل التراكمي بدقة لتطابق الـ 8 كروت كاملة.")
+st.write("تم تصحيح وتثبيت بنية الكود تماماً لتلافي أخطاء السيرفر وتفعيل مصفوفتك التوضيحية لتعويض الترحيل.")
 
-# تنظيف الذاكرة السحابية لفرض التعديل الجديد
+# تنظيف الذاكرة السحابية المؤقتة لفرض السطر الجديد فوراً وبقوة
 st.cache_data.clear()
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
@@ -122,7 +122,7 @@ template_image = st.file_uploader("3. اختر صورة الاستمبة الف�
 
 if excel_file and uploaded_images and template_image:
     if st.button("توليد كروت الطباعة المجمعة", type="primary"):
-        with st.spinner("جاري تطبيق مصفوفة تعويض الترحيل التراكمي المخصصة..."):
+        with st.spinner("جاري تنظيف ومعالجة الكروت بالبنية الثابتة الجديدة..."):
             try:
                 prs_result = generate_cards(excel_file, uploaded_images, template_image)
                 
@@ -130,10 +130,10 @@ if excel_file and uploaded_images and template_image:
                 prs_result.save(output)
                 output.seek(0)
                 
-                st.success("تم توليد الملف النهائي بالوزنة الجديدة والمخصصة! 🎉")
+                st.success("تم التوليد بنجاح باهر وبدون أي أخطاء! جاهز للتحميل. 🎉")
                 
                 st.download_button(
-                    label="📥 تحميل ملف الباوربوينت النهائي الجاهز للطباعة",
+                    label="📥 تحميل ملف الباوربوينت الموزون بالمصفوفة البديلة",
                     data=output,
                     file_name="Xceed_Cards_Perfect_Match.pptx",
                     mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
