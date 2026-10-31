@@ -114,15 +114,24 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 
-# 🔒 كود حقن CSS مخصص لإخفاء علامات التبويب والقائمة والبروفايل وحواف المطورين نهائياً
+# 🔒 استهداف شامل ونهائي لكافة عناصر وقوائم وأزرار وعلامات Streamlit لإزالتها كلياً من العرض
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    /* إخفاء القائمة العلوية وأزرار النشر والمطور */
+    #MainMenu {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    header {visibility: hidden !important;}
     .stAppDeployButton {display: none !important;}
-    div[data-testid="stToolbar"] {visibility: hidden !important;}
-    div[data-testid="stDecoration"] {display: none !important;}
+    
+    /* إخفاء شريط الأدوات وعلامات التزيين الخلفية */
+    div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+    div[data-testid="stDecoration"] {display: none !important; visibility: hidden !important;}
+    
+    /* الحجب الصارم للأيقونات السفلية العائمة وأزرار المطور في المتصفحات المشتركة */
+    div.stViewerBadge {display: none !important; visibility: hidden !important;}
+    .st-emotion-cache-1wbqy5l {display: none !important;}
+    iframe[title="Managed Hosting Toolbar"] {display: none !important;}
+    #streamlit--manage-app-footer {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
 
