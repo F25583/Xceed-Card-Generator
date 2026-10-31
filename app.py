@@ -12,7 +12,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     # 1. قراءة ملف البيانات
     df = pd.read_excel(excel_file)
     
-    # 2. معرفة أبعاد صورة الاستمبة المرفوعة تلقائياً لتجنب تمطيطها
+    # 2. قراءة أبعاد صورة الاستمبة المرفوعة تلقائياً لمنع التمطيط
     template_image_file.seek(0)
     pil_img = Image.open(template_image_file)
     img_width_px, img_height_px = pil_img.size
@@ -30,20 +30,20 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 تحديث الإحداثيات الموزونة بالملي لتوسيط الصور والنصوص تماماً داخل إطار الكروت المرفقة:
+    # 📌 إعادة ضبط التوزيع والمسافات بناءً على مقاس الصورة الجديد (1.7 × 1.22) والتوسيط أسفل شعار Xceed
     w_scale = prs.slide_width / Inches(10.0) 
     
     card_positions = [
-        # الصف العلوي (توسيط كامل)
-        {"img_left": Inches(0.53) * w_scale, "img_top": Inches(0.82), "txt_left": Inches(0.20) * w_scale, "txt_top": Inches(2.62)},
-        {"img_left": Inches(2.93) * w_scale, "img_top": Inches(0.82), "txt_left": Inches(2.60) * w_scale, "txt_top": Inches(2.62)},
-        {"img_left": Inches(5.33) * w_scale, "img_top": Inches(0.82), "txt_left": Inches(5.00) * w_scale, "txt_top": Inches(2.62)},
-        {"img_left": Inches(7.73) * w_scale, "img_top": Inches(0.82), "txt_left": Inches(7.40) * w_scale, "txt_top": Inches(2.62)},
-        # الصف السفلي (توسيط كامل)
-        {"img_left": Inches(0.53) * w_scale, "img_top": Inches(4.27), "txt_left": Inches(0.20) * w_scale, "txt_top": Inches(6.07)},
-        {"img_left": Inches(2.93) * w_scale, "img_top": Inches(4.27), "txt_left": Inches(2.60) * w_scale, "txt_top": Inches(6.07)},
-        {"img_left": Inches(5.33) * w_scale, "img_top": Inches(4.27), "txt_left": Inches(5.00) * w_scale, "txt_top": Inches(6.07)},
-        {"img_left": Inches(7.73) * w_scale, "img_top": Inches(4.27), "txt_left": Inches(7.40) * w_scale, "txt_top": Inches(6.07)}
+        # الصف العلوي (الكروت 1، 2، 3، 4)
+        {"img_left": Inches(0.57) * w_scale, "img_top": Inches(0.82), "name_left": Inches(0.20) * w_scale, "name_top": Inches(2.58), "id_left": Inches(1.18) * w_scale, "id_top": Inches(2.93)},
+        {"img_left": Inches(2.97) * w_scale, "img_top": Inches(0.82), "name_left": Inches(2.60) * w_scale, "name_top": Inches(2.58), "id_left": Inches(3.58) * w_scale, "id_top": Inches(2.93)},
+        {"img_left": Inches(5.37) * w_scale, "img_top": Inches(0.82), "name_left": Inches(5.00) * w_scale, "name_top": Inches(2.58), "id_left": Inches(5.98) * w_scale, "id_top": Inches(2.93)},
+        {"img_left": Inches(7.77) * w_scale, "img_top": Inches(0.82), "name_left": Inches(7.40) * w_scale, "name_top": Inches(2.58), "id_left": Inches(8.38) * w_scale, "id_top": Inches(2.93)},
+        # الصف السفلي (الكروت 5، 6، 7، 8)
+        {"img_left": Inches(0.57) * w_scale, "img_top": Inches(4.27), "name_left": Inches(0.20) * w_scale, "name_top": Inches(6.03), "id_left": Inches(1.18) * w_scale, "id_top": Inches(6.38)},
+        {"img_left": Inches(2.97) * w_scale, "img_top": Inches(4.27), "name_left": Inches(2.60) * w_scale, "name_top": Inches(6.03), "id_left": Inches(3.58) * w_scale, "id_top": Inches(6.38)},
+        {"img_left": Inches(5.37) * w_scale, "img_top": Inches(4.27), "name_left": Inches(5.00) * w_scale, "name_top": Inches(6.03), "id_left": Inches(5.98) * w_scale, "id_top": Inches(6.38)},
+        {"img_left": Inches(7.77) * w_scale, "img_top": Inches(4.27), "name_left": Inches(7.40) * w_scale, "name_top": Inches(6.03), "id_left": Inches(8.38) * w_scale, "id_top": Inches(6.38)}
     ]
 
     current_slide = None
@@ -64,44 +64,39 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         
         pos = card_positions[card_index]
         
-        # 1. إضافة صورة الموظف بالمنتصف (العرض 1.3 والارتفاع 1.65 بوصة)
+        # 1. إضافة صورة الموظف بالمنتصف تماماً أسفل كلمة Xceed (المقاس المطلوب: 1.7 على 1.22 بوصة)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
-            current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.30), height=Inches(1.65))
+            current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
-        # 2. إضافة وتوسيط النصوص (الاسم بالأزرق، والـ ID بالأحمر أمام كلمة ID الأصلية)
-        txBox = current_slide.shapes.add_textbox(pos["txt_left"], pos["txt_top"], Inches(2.35) * w_scale, Inches(0.8))
-        tf = txBox.text_frame
-        tf.word_wrap = True
-        tf.margin_top = Inches(0)
-        tf.margin_left = Inches(0)
-        tf.margin_right = Inches(0)
-        tf.margin_bottom = Inches(0)
+        # 2. إضافة صندوق الاسم (منفصل وموسط بحجم خط 14 بلون أزرق)
+        txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(2.35) * w_scale, Inches(0.4))
+        tf_name = txBox_name.text_frame
+        tf_name.word_wrap = True
+        tf_name.margin_top = tf_name.margin_bottom = tf_name.margin_left = tf_name.margin_right = Inches(0)
         
-        # تنسيق وتوسيط الاسم الثنائي
-        p_name = tf.paragraphs[0]
+        p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
-        p_name.alignment = PP_ALIGN.CENTER  # توسيط الاسم في المنتصف
-        p_name.font.size = Pt(10.5)
+        p_name.alignment = PP_ALIGN.CENTER
+        p_name.font.size = Pt(14)  # المقاس المطلوب 14
         p_name.font.bold = True
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
         
-        # تنسيق وتوجيه رقم الـ ID ليقع أمام الكلمة المطبوعة بالخلفية مباشرة وبشكل موسط
-        p_id = tf.add_paragraph()
-        p_id.space_before = Pt(4)
-        p_id.alignment = PP_ALIGN.CENTER  # توسيط السطر لتوزيع المساحة بالتساوي
+        # 3. إضافة صندوق رقم الـ ID (منفصل تماماً بحجم خط 14 بلون أحمر ليسقط أمام كلمة ID الثابتة بالخلفية دون لمس الاسم)
+        txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(1.20) * w_scale, Inches(0.3))
+        tf_id = txBox_id.text_frame
+        tf_id.word_wrap = False
+        tf_id.margin_top = tf_id.margin_bottom = tf_id.margin_left = tf_id.margin_right = Inches(0)
         
-        run_indent = p_id.add_run()
-        run_indent.text = "   "  # مسافات مدروسة لترحيل الرقم للأمام قليلاً ليتخطى كلمة ID المطبوعة
-        
-        run_num = p_id.add_run()
-        run_num.text = emp_id
-        run_num.font.size = Pt(10.5)
-        run_num.font.bold = True
-        run_num.font.name = 'Arial'
-        run_num.font.color.rgb = RGBColor(255, 0, 0)
+        p_id = tf_id.paragraphs[0]
+        p_id.text = emp_id
+        p_id.alignment = PP_ALIGN.LEFT  # يبدأ مباشرة أمام النقطتين الخاصين بـ :ID
+        p_id.font.size = Pt(14)  # المقاس المطلوب 14
+        p_id.font.bold = True
+        p_id.font.name = 'Arial'
+        p_id.font.color.rgb = RGBColor(255, 0, 0)
 
     output = BytesIO()
     prs.save(output)
@@ -119,10 +114,10 @@ template_image = st.file_uploader("3. اختر صورة الاستمبة الف�
 
 if excel_file and uploaded_images and template_image:
     if st.button("توليد كروت الطباعة المجمعة", type="primary"):
-        with st.spinner("جاري التوسيط الدقيق للصور وتنسيق الأسماء الثنائية..."):
+        with st.spinner("جاري ضبط مقاس الخط 14 وأبعاد الصور 1.7 × 1.22 وتثبيتها..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.success("تم توليد الملف بالتنسيق الموسط والمطابق تماماً للاستمبة المرفوعة! 🎉")
+                st.success("تم توليد الملف بالتنسيق والمقاسات الجديدة المطلوبة تماماً! 🎉")
                 
                 st.download_button(
                     label="📥 تحميل ملف الباوربوينت المنظم للطباعة",
