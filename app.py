@@ -30,7 +30,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 الإحداثيات الثابتة والأصلية اللي كانت قريبة جداً مع تعديل ترحيل السنتر بالملي:
+    # 📌 الإحداثيات المعتمدة والمثالية للصور (تم تثبيتها نهائياً بناءً على معاينتك السليمة)
     card_positions = [
         # الصف العلوي (الكروت 1، 2، 3، 4)
         {"img_left": Inches(0.50), "img_top": Inches(0.85), "name_left": Inches(0.20), "name_top": Inches(2.60), "id_left": Inches(1.15), "id_top": Inches(2.95)},
@@ -62,7 +62,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         
         pos = card_positions[card_index]
         
-        # 1. إضافة صورة الموظف (المقاس المطلوب: 1.7 طول × 1.22 عرض)
+        # 1. إضافة صورة الموظف (المقاس المعتمد: 1.7 طول × 1.22 عرض)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
@@ -104,7 +104,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("قم برفع ملف البيانات والصور وصورة الاستمبة المجمعة ليقوم البرنامج بتوزيعها تلقائياً.")
+st.write("وضع الصور ثابت وممتاز 100%. جاهزون للخطوة التالية للبيانات.")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
 uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
@@ -115,10 +115,10 @@ if excel_file and uploaded_images and template_image:
         with st.spinner("جاري التثبيت التلقائي والمحاذاة الشاملة للكروت..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.success("تم توليد الملف بالتنسيق النهائي الموزون! 🎉")
+                st.success("تم توليد الملف بنجاح! 🎉")
                 
                 st.download_button(
-                    label="📥 تحميل ملف الباوربوينت الجاهز للطباعة الفورية",
+                    label="📥 تحميل ملف الباوربوينت المعتمد للصور",
                     data=result_pptx,
                     file_name="Xceed_Cards_Final_Version.pptx",
                     mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
