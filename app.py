@@ -23,27 +23,35 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     prs.slide_height = Inches(7.5) 
     prs.slide_width = Inches(7.5 * aspect_ratio) 
     
-    # تحديد رقم التخطيط الفارغ (6) بشكل رقمي صريح وقاطع لقتل خطأ الخادم السحابي
-    blank_layout = prs.slide_layouts[6]
+    # استدعاء مباشر ومستقر للتخطيط الفارغ القياسي
+    blank_layout = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[0]
     
     images_dict = {}
     for img in uploaded_images:
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 مصفوفة تعويض الترحيل التراكمي خطوة بخطوة المخصصة لضبط الكروت (Perfect Match):
+    # 📌 المقاسات النهائية الموزونة بالمليمتر لمنع الترحيل الأفقي والرأسي تماماً:
     card_positions = [
-        # ─────── الصف العلوي (معالجة الترحيل التراكمي خطوة بخطوة) ───────
-        {"img_left": Inches(0.94), "img_top": Inches(0.92), "name_left": Inches(0.50), "name_top": Inches(2.58), "id_left": Inches(1.36), "id_top": Inches(2.93)}, # كارت 1
-        {"img_left": Inches(3.24), "img_top": Inches(0.96), "name_left": Inches(2.80), "name_top": Inches(2.62), "id_left": Inches(3.66), "id_top": Inches(2.97)}, # كارت 2
-        {"img_left": Inches(5.54), "img_top": Inches(1.00), "name_left": Inches(5.10), "name_top": Inches(2.66), "id_left": Inches(5.96), "id_top": Inches(3.01)}, # كارت 3
-        {"img_left": Inches(7.84), "img_top": Inches(1.04), "name_left": Inches(7.40), "name_top": Inches(2.70), "id_left": Inches(8.26), "id_top": Inches(3.05)}, # كارت 4
+        # ─────── الصف العلوي (تثبيت الـ Top تماماً أفقياً مع خطوة 2.45 بوصة) ───────
+        # كارت 1
+        {"img_left": Inches(0.94), "img_top": Inches(0.92), "name_left": Inches(0.50), "name_top": Inches(2.58), "id_left": Inches(1.36), "id_top": Inches(2.93)}, 
+        # كارت 2
+        {"img_left": Inches(3.39), "img_top": Inches(0.92), "name_left": Inches(2.95), "name_top": Inches(2.58), "id_left": Inches(3.81), "id_top": Inches(2.93)}, 
+        # كارت 3
+        {"img_left": Inches(5.84), "img_top": Inches(0.92), "name_left": Inches(5.40), "name_top": Inches(2.58), "id_left": Inches(6.26), "id_top": Inches(2.93)}, 
+        # كارت 4
+        {"img_left": Inches(8.29), "img_top": Inches(0.92), "name_left": Inches(7.85), "name_top": Inches(2.58), "id_left": Inches(8.71), "id_top": Inches(2.93)}, 
         
-        # ─────── الصف السفلي (معالجة الترحيل التراكمي خطوة بخطوة) ───────
-        {"img_left": Inches(0.94), "img_top": Inches(4.18), "name_left": Inches(0.50), "name_top": Inches(5.84), "id_left": Inches(1.36), "id_top": Inches(6.19)}, # كارت 5
-        {"img_left": Inches(3.24), "img_top": Inches(4.22), "name_left": Inches(2.80), "name_top": Inches(5.88), "id_left": Inches(3.66), "id_top": Inches(6.23)}, # كارت 6
-        {"img_left": Inches(5.54), "img_top": Inches(4.26), "name_left": Inches(5.10), "name_top": Inches(5.92), "id_left": Inches(5.96), "id_top": Inches(6.27)}, # كارت 7
-        {"img_left": Inches(7.84), "img_top": Inches(4.30), "name_left": Inches(7.40), "name_top": Inches(5.96), "id_left": Inches(8.26), "id_top": Inches(6.31)}  # كارت 8
+        # ─────── الصف السفلي (تثبيت الـ Top تماماً أفقياً مع خطوة 2.45 بوصة) ───────
+        # كارت 5
+        {"img_left": Inches(0.94), "img_top": Inches(4.18), "name_left": Inches(0.50), "name_top": Inches(5.84), "id_left": Inches(1.36), "id_top": Inches(6.19)}, 
+        # كارت 6
+        {"img_left": Inches(3.39), "img_top": Inches(4.18), "name_left": Inches(2.95), "name_top": Inches(5.84), "id_left": Inches(3.81), "id_top": Inches(6.19)}, 
+        # كارت 7
+        {"img_left": Inches(5.84), "img_top": Inches(4.18), "name_left": Inches(5.40), "name_top": Inches(5.84), "id_left": Inches(6.26), "id_top": Inches(6.19)}, 
+        # كارت 8
+        {"img_left": Inches(8.29), "img_top": Inches(4.18), "name_left": Inches(7.85), "name_top": Inches(5.84), "id_left": Inches(8.71), "id_top": Inches(6.19)}  
     ]
 
     current_slide = None
@@ -64,7 +72,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         
         pos = card_positions[card_index]
         
-        # 1. إسقاط صورة الموظف بالمقاس الصارم (1.7 × 1.22 بوصة)
+        # 1. إسقاط صورة الموظف بالمقاس الصارم المطلوب (1.7 × 1.22 بوصة)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
@@ -98,15 +106,15 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_id.font.name = 'Arial'
         p_id.font.color.rgb = RGBColor(255, 0, 0)
 
-    return prs
+    output = BytesIO()
+    prs.save(output)
+    output.seek(0)
+    return output
 
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("النسخة النهائية الصارمة لتعويض ترحيل الثمانية كروت بالكامل والتشغيل الآمن للأدوات.")
-
-# تنظيف الذاكرة السحابية المؤقتة نهائياً لفرض السطر الرقمي الجديد
-st.cache_data.clear()
+st.write("تم تطبيق مصفوفة المسافات الثابتة الجديدة (خطوة 2.45 بوصة) لتطابق الـ 8 كروت كاملة.")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
 uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
@@ -114,19 +122,14 @@ template_image = st.file_uploader("3. اختر صورة الاستمبة الف�
 
 if excel_file and uploaded_images and template_image:
     if st.button("توليد كروت الطباعة المجمعة", type="primary"):
-        with st.spinner("جاري تنظيف ومعالجة الكروت بالبنية الثابتة الرقمية..."):
+        with st.spinner("جاري تطبيق مصفوفة تعويض الترحيل المحدثة..."):
             try:
-                prs_result = generate_cards(excel_file, uploaded_images, template_image)
-                
-                output = BytesIO()
-                prs_result.save(output)
-                output.seek(0)
-                
-                st.success("تم التوليد بنجاح باهر وبدون أي أخطاء! جاهز للتحميل. 🎉")
+                result_pptx = generate_cards(excel_file, uploaded_images, template_image)
+                st.success("تم التوليد بنجاح باهر! جاهز للتحميل. 🎉")
                 
                 st.download_button(
-                    label="📥 تحميل ملف الباوربوينت الموزون بالمصفوفة البديلة",
-                    data=output,
+                    label="📥 تحميل ملف الباوربوينت النهائي الجاهز للطباعة",
+                    data=result_pptx,
                     file_name="Xceed_Cards_Perfect_Match.pptx",
                     mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 )
