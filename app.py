@@ -117,7 +117,7 @@ st.title("البرنامج الالي لطباعة كروت الموظفين")
 st.write("برجاء اضافة البيانات بشكل صحيح لاستخراج الكروت.")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
-uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+uploaded_images = st.file_uploader("2.قم بأضافة الصورة مرفقة بالرقم الوظيفي):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 template_image = st.file_uploader("3. اختر صورة الاستمبة الفارغة المجمعة (Template Image):", type=["jpg", "jpeg", "png"])
 
 if excel_file and uploaded_images and template_image:
