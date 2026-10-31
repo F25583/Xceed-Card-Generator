@@ -114,33 +114,31 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 
-# 🔒 تدمير وحظر عناصر الإضافة الإضافية لـ Streamlit بالكامل وجعل الـ Body يغطي الشاشة بنسبة 100%
+# 🔒 كود الحجب الشامل والنهائي لتدمير واقتلاع شريط الأدوات وعلامات الاستضافة السفلية لـ Streamlit بالكامل
 st.markdown("""
     <style>
-    /* حظر القوائم والشاشات الرأسية والسفلية القياسية */
+    /* إخفاء القوائم والشاشات الرأسية والسفلية القياسية */
     #MainMenu {visibility: hidden !important; display: none !important;}
     footer {visibility: hidden !important; display: none !important;}
     header {visibility: hidden !important; display: none !important;}
     .stAppDeployButton {display: none !important;}
     
     /* تفكيك وحذف الشريط السفلي المضاف للمطور وعلامة الاستضافة تماماً */
-    [data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
-    [data-testid="stDecoration"] {display: none !important; visibility: hidden !important;}
-    .stViewerBadge {display: none !important; visibility: hidden !important;}
+    div[data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
+    div[data-testid="stDecoration"] {display: none !important; visibility: hidden !important;}
+    div.stViewerBadge {display: none !important; visibility: hidden !important;}
     
-    /* استهداف كتل الإطارات الخارجية التابعة لمنصة إدارة خدمات السحابة والتحكم المتصفحي */
-    iframe, iframe[src*="streamlit.app"], .st-emotion-cache-1wbqy5l {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    #streamlit--manage-app-footer, [id*="streamlit--manage-app"] {
-        display: none !important;
-        visibility: hidden !important;
-    }
+    /* استهداف وتصفير أي إطار خارجي أو تزيين يتم حقنه من السحابة بالكامل */
+    .st-emotion-cache-1wbqy5l {display: none !important; visibility: hidden !important;}
+    div[class^="st-emotion-cache"] footer {display: none !important;}
     
-    /* فرض تنسيق العرض الكلي المستقل */
+    /* كود إضافي مخصص لاستهداف وحذف شريط الإدارة العائم المزعج */
+    div[data-testid="stStatusWidget"] {display: none !important; visibility: hidden !important;}
+    iframe[src*="streamlit.app"] {display: none !important;}
+    
+    /* تعديل الهوامش السفلية لتغطية المساحة البيضاء تماماً */
     .block-container {
-        padding-bottom: 2rem !important;
+        padding-bottom: 1rem !important;
     }
     </style>
 """, unsafe_allow_html=True)
