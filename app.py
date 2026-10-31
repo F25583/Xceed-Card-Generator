@@ -30,7 +30,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 الإحداثيات المعتمدة والمثالية للصور (تم تثبيتها نهائياً بناءً على معاينتك السليمة)
+    # 📌 التزام تام وحرفي بأرقام المسطرة المحددة في صورتك (0.50, 2.90, 5.30, 7.70) للعرض و (0.85, 4.25) للارتفاع
     card_positions = [
         # الصف العلوي (الكروت 1، 2، 3، 4)
         {"img_left": Inches(0.50), "img_top": Inches(0.85), "name_left": Inches(0.20), "name_top": Inches(2.60), "id_left": Inches(1.15), "id_top": Inches(2.95)},
@@ -62,13 +62,13 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         
         pos = card_positions[card_index]
         
-        # 1. إضافة صورة الموظف (المقاس المعتمد: 1.7 طول × 1.22 عرض)
+        # 1. إضافة صورة الموظف بالالتزام بمقاسك المحدد (1.7 طول × 1.22 عرض)
         if emp_id in images_dict:
             img_file = images_dict[emp_id]
             img_file.seek(0)
             current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
-        # 2. إضافة صندوق الاسم (حجم 14 أزرق موسط ومستقل)
+        # 2. إضافة صندوق الاسم (حجم 14 أزرق موسط مستقل)
         txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(2.35), Inches(0.35))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
@@ -104,7 +104,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("وضع الصور ثابت وممتاز 100%. جاهزون للخطوة التالية للبيانات.")
+st.write("تم تثبيت نقاط المسطرة الأصلية (0.50, 2.90, 5.30, 7.70).")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
 uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
@@ -112,15 +112,15 @@ template_image = st.file_uploader("3. اختر صورة الاستمبة الف�
 
 if excel_file and uploaded_images and template_image:
     if st.button("توليد كروت الطباعة المجمعة", type="primary"):
-        with st.spinner("جاري التثبيت التلقائي والمحاذاة الشاملة للكروت..."):
+        with st.spinner("جاري التطابق مع أبعاد المسطرة..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
                 st.success("تم توليد الملف بنجاح! 🎉")
                 
                 st.download_button(
-                    label="📥 تحميل ملف الباوربوينت المعتمد للصور",
+                    label="📥 تحميل ملف الباوربوينت الملتزم بالمسطرة",
                     data=result_pptx,
-                    file_name="Xceed_Cards_Final_Version.pptx",
+                    file_name="Xceed_Cards_Fixed_Ruler.pptx",
                     mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 )
             except Exception as e:
