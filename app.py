@@ -113,8 +113,8 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
 
 # واجهة مستخدم ستريمليت Streamlit
 st.set_page_config(page_title="Xceed Print Generator", layout="centered")
-st.title("🪪 طباعة كروت موظفي Xceed الآلية (8 كروت بالشريحة)")
-st.write("النسخة النهائية المطلقة: تطابق رقمي كامل ومدروس مع قياسات الباوربوينت الحية.")
+st.title("البرنامج الالي لطباعة كروت الموظفين")
+st.write("برجاء اضافة البيانات بشكل صحيح لاستخراج الكروت.")
 
 excel_file = st.file_uploader("1. اختر ملف بيانات الموظفين (Excel):", type=["xlsx", "xls"])
 uploaded_images = st.file_uploader("2. اختر صور الموظفين معاً (اسم الصورة = ID):", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
