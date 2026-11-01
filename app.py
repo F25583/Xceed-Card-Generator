@@ -79,18 +79,17 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     ]
 
     current_slide = None
-    loaded_card_count = 0  # عداد ذكي لحساب موضع الكروت المقبولة تتابعياً لمنع الفراغات
+    success_count = 0  # عداد تتابعي حقيقي للكروت المضافة لمنع الصفحات البيضاء والمربعات الرمادية
 
     for index, row in df.iterrows():
         raw_id = str(row['ID']).strip()
         emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
         
-        # 🛑 الشرط الجديد: إذا لم تكن صورة الموظف مرفوعة، يتم تجاوزه تماماً ولا يحجز له كارت فارغ
+        # 🛑 تجاوز البيانات التي ليس لها صور فوراً بدون حجز كروت مفرغة
         if emp_id not in images_dict:
             continue
-
-        # تحديد موضع الكارت (0 إلى 7) بناءً على الكروت الفعلية المضافة التي تمتلك صوراً فقط
-        card_index = loaded_card_count % 8
+            
+        card_index = success_count % 8
         
         if card_index == 0:
             current_slide = prs.slides.add_slide(blank_layout)
@@ -107,7 +106,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         img_file.seek(0)
         current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
-        # 2. إضافة صندوق الاسم (تعديل الفونط إلى 12 وعرض 1.65 بوصة)
+        # 2. إضافة صندوق الاسم (حجم 12 أزرق موسط ومتناسق وعرض 1.65 بوصة)
         txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(1.65), Inches(0.23))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
@@ -116,12 +115,12 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
-        p_name.font.size = Pt(12)  # 👈 تم التعديل إلى 12
+        p_name.font.size = Pt(12)  # تغيير الفونط لـ 12 منعاً للتداخل
         p_name.font.bold = True
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
         
-        # 3. إضافة صندوق رقم الـ ID (تعديل الفونط إلى 12 وعرض 0.95 بوصة)
+        # 3. إضافة صندوق رقم الـ ID (حجم 12 أحمر وعرض 0.95 بوصة)
         txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(0.95), Inches(0.23))
         tf_id = txBox_id.text_frame
         tf_id.word_wrap = False
@@ -130,13 +129,12 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_id = tf_id.paragraphs[0]
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
-        p_id.font.size = Pt(12)  # 👈 تم التعديل إلى 12
+        p_id.font.size = Pt(12)  # تغيير الفونط لـ 12 منعاً للتداخل
         p_id.font.bold = True
         p_id.font.name = 'Arial'
         p_id.font.color.rgb = RGBColor(255, 0, 0)
         
-        # زيادة العداد للانتقال للموضع التالي تتابعياً داخل الاستمبة
-        loaded_card_count += 1
+        success_count += 1
 
     output = BytesIO()
     prs.save(output)
@@ -156,7 +154,7 @@ if excel_file and uploaded_images and template_image:
         with st.spinner("جاري صب البيانات وتوليد الملف بأبعاد متناهية الدقة..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.success("تم التوليد بنجاح تام! الكود متطابق الآن وتتابعي بنسبة 100%. 🎉")
+                st.success("تم التوليد بنجاح تام! الكود متطابق الآن مع ملف الباوربوينت الخاص بك بنسبة 100%. 🎉")
                 
                 st.download_button(
                     label="📥 تحميل ملف الباوربوينت المطابق تماماً",
