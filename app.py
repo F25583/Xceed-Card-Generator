@@ -47,7 +47,6 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     prs.slide_height = Inches(7.5) 
     prs.slide_width = Inches(7.5 * aspect_ratio) 
     
-    # استدعاء مباشر ومستقر للتخطيط الفارغ القياسي
     blank_layout = prs.slide_layouts[6] if len(prs.slide_layouts) > 6 else prs.slide_layouts[0]
     
     images_dict = {}
@@ -55,41 +54,33 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         name_without_ext = os.path.splitext(img.name)[0]
         images_dict[str(name_without_ext).strip()] = img
 
-    # 📌 المقاسات النهائية المأخوذة حرفياً من لقطات الشاشة للـ Format Shape لكل عنصر:
+    # 📌 المقاسات الموزونة المأخوذة من لقطات الشاشة للـ Format Shape:
     card_positions = [
         # ─────── الصف العلوي (الأسماء عند 2.75 والـ ID عند 3.06) ───────
-        # كارت 1
-        {"img_left": Inches(0.77), "img_top": Inches(1.01), "name_left": Inches(0.56), "name_top": Inches(2.75), "id_left": Inches(1.23), "id_top": Inches(3.06)}, 
-        # كارت 2
-        {"img_left": Inches(3.11), "img_top": Inches(1.01), "name_left": Inches(2.86), "name_top": Inches(2.75), "id_left": Inches(3.60), "id_top": Inches(3.06)}, 
-        # كارت 3
-        {"img_left": Inches(5.45), "img_top": Inches(1.01), "name_left": Inches(5.20), "name_top": Inches(2.75), "id_left": Inches(5.94), "id_top": Inches(3.06)}, 
-        # كارت 4
-        {"img_left": Inches(7.79), "img_top": Inches(1.01), "name_left": Inches(7.54), "name_top": Inches(2.75), "id_left": Inches(8.28), "id_top": Inches(3.06)}, 
+        {"img_left": Inches(0.77), "img_top": Inches(1.01), "name_left": Inches(0.56), "name_top": Inches(2.75), "id_left": Inches(1.23), "id_top": Inches(3.06)}, # كارت 1
+        {"img_left": Inches(3.11), "img_top": Inches(1.01), "name_left": Inches(2.86), "name_top": Inches(2.75), "id_left": Inches(3.60), "id_top": Inches(3.06)}, # كارت 2
+        {"img_left": Inches(5.45), "img_top": Inches(1.01), "name_left": Inches(5.20), "name_top": Inches(2.75), "id_left": Inches(5.94), "id_top": Inches(3.06)}, # كارت 3
+        {"img_left": Inches(7.79), "img_top": Inches(1.01), "name_left": Inches(7.54), "name_top": Inches(2.75), "id_left": Inches(8.28), "id_top": Inches(3.06)}, # كارت 4
         
         # ─────── الصف السفلي (الأسماء عند 6.40 والـ ID عند 6.71) ───────
-        # كارت 5
-        {"img_left": Inches(0.77), "img_top": Inches(4.66), "name_left": Inches(0.56), "name_top": Inches(6.40), "id_left": Inches(1.24), "id_top": Inches(6.71)}, 
-        # كارت 6
-        {"img_left": Inches(3.15), "img_top": Inches(4.66), "name_left": Inches(2.90), "name_top": Inches(6.40), "id_left": Inches(3.59), "id_top": Inches(6.71)}, 
-        # كارت 7
-        {"img_left": Inches(5.53), "img_top": Inches(4.66), "name_left": Inches(5.28), "name_top": Inches(6.40), "id_left": Inches(5.97), "id_top": Inches(6.71)}, 
-        # كارت 8
-        {"img_left": Inches(7.91), "img_top": Inches(4.66), "name_left": Inches(7.66), "name_top": Inches(6.40), "id_left": Inches(8.35), "id_top": Inches(6.71)}  
+        {"img_left": Inches(0.77), "img_top": Inches(4.66), "name_left": Inches(0.56), "name_top": Inches(6.40), "id_left": Inches(1.24), "id_top": Inches(6.71)}, # كارت 5
+        {"img_left": Inches(3.15), "img_top": Inches(4.66), "name_left": Inches(2.90), "name_top": Inches(6.40), "id_left": Inches(3.59), "id_top": Inches(6.71)}, # كارت 6
+        {"img_left": Inches(5.53), "img_top": Inches(4.66), "name_left": Inches(5.28), "name_top": Inches(6.40), "id_left": Inches(5.97), "id_top": Inches(6.71)}, # كارت 7
+        {"img_left": Inches(7.91), "img_top": Inches(4.66), "name_left": Inches(7.66), "name_top": Inches(6.40), "id_left": Inches(8.35), "id_top": Inches(6.71)}  # كارت 8
     ]
 
     current_slide = None
-    loaded_card_count = 0  # عداد الكروت الفعلية المضافة التي تمتلك صوراً فقط
+    loaded_card_count = 0  # العداد السحري لملء الأماكن بالترتيب التتالي الصحيح
 
     for index, row in df.iterrows():
         raw_id = str(row['ID']).strip()
         emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
         
-        # 🛑 الشرط الحاسم: إذا لم تكن صورة الموظف موجودة في المجلد المرفوع، يتم تخطيه تماماً
+        # 🛑 تجاوز الموظف مباشرة إذا لم تكن صورته موجودة (دون حجز مكان فارغ)
         if emp_id not in images_dict:
             continue
             
-        # حساب المؤشر والموقع بناءً على الكروت المقبولة فقط لعدم ترك فراغات ملخبطة
+        # حساب الموضع بناءً على عدد الكروت المقبولة فعلياً لضمان التتالي الكامل
         card_index = loaded_card_count % 8
         
         if card_index == 0:
@@ -102,12 +93,12 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         
         pos = card_positions[card_index]
         
-        # 1. إسقاط صورة الموظف بالمقاس الصارم (1.7 × 1.22 بوصة)
+        # 1. إسقاط صورة الموظف المقبول
         img_file = images_dict[emp_id]
         img_file.seek(0)
         current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
-        # 2. إضافة صندوق الاسم (حجم 12 أزرق موسط ومتناسق وععرض 1.65 بوصة)
+        # 2. إضافة صندوق الاسم فونط 12
         txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(1.65), Inches(0.23))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
@@ -116,12 +107,12 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
-        p_name.font.size = Pt(12)  # 👈 تعديل الفونط إلى 12
+        p_name.font.size = Pt(12)  
         p_name.font.bold = True
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
         
-        # 3. إضافة صندوق رقم الـ ID (حجم 12 أحمر يبدأ بدقة بعد نقطتي الـ :ID وعرض 0.95 بوصة)
+        # 3. إضافة صندوق الـ ID فونط 12
         txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(0.95), Inches(0.23))
         tf_id = txBox_id.text_frame
         tf_id.word_wrap = False
@@ -130,12 +121,12 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_id = tf_id.paragraphs[0]
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
-        p_id.font.size = Pt(12)  # 👈 تعديل الفونط إلى 12
+        p_id.font.size = Pt(12)  
         p_id.font.bold = True
         p_id.font.name = 'Arial'
         p_id.font.color.rgb = RGBColor(255, 0, 0)
         
-        # زيادة عداد الكروت الناجحة للانتقال للموضع التالي بشكل صحيح
+        # زيادة العداد للانتقال للمربع التالي في الاستمبة تتابعياً
         loaded_card_count += 1
 
     output = BytesIO()
@@ -156,7 +147,7 @@ if excel_file and uploaded_images and template_image:
         with st.spinner("جاري صب البيانات وتوليد الملف بأبعاد متناهية الدقة..."):
             try:
                 result_pptx = generate_cards(excel_file, uploaded_images, template_image)
-                st.success("تم التوليد بنجاح تام! الكود متطابق الآن مع ملف الباوربوينت الخاص بك بنسبة 100%. 🎉")
+                st.success("تم التوليد بنجاح تام! الكود متطابق الآن وموزع تتابعياً بنسبة 100%. 🎉")
                 
                 st.download_button(
                     label="📥 تحميل ملف الباوربوينت المطابق تماماً",
