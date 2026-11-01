@@ -8,6 +8,30 @@ import streamlit as st
 from io import BytesIO
 from PIL import Image
 
+# 🛠️ تكوين الصفحة وإخفاء أزرار السورس كود والـ Fork تماماً لحماية التطبيق
+st.set_page_config(page_title="Xceed Print Generator", layout="centered")
+
+st.markdown("""
+    <style>
+    /* إخفاء زر Deploy والـ Fork */
+    .stAppDeployButton {
+        display: none !important;
+    }
+    /* إخفاء القائمة العلوية النقاط الثلاث بالكامل */
+    #MainMenu {
+        visibility: hidden !important;
+    }
+    /* إخفاء الهيدر الافتراضي لستريمليت */
+    header {
+        visibility: hidden !important;
+    }
+    /* إخفاء زر التقرير المزعج أسفل الصفحة */
+    footer {
+        visibility: hidden !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 def generate_cards(excel_file, uploaded_images, template_image_file):
     # 1. قراءة ملف البيانات
     df = pd.read_excel(excel_file)
@@ -112,7 +136,6 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     return output
 
 # واجهة مستخدم ستريمليت Streamlit
-st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 st.title("البرنامج الالي لطباعة كروت الموظفين")
 st.write("برجاء اضافة البيانات بشكل صحيح لاستخراج الكروت.")
 
