@@ -111,7 +111,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
-        p_name.font.size = Pt(12)
+        p_name.font.size = Pt(14)
         p_name.font.bold = True
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
@@ -125,7 +125,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_id = tf_id.paragraphs[0]
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
-        p_id.font.size = Pt(12)
+        p_id.font.size = Pt(14)
         p_id.font.bold = True
         p_id.font.name = 'Arial'
         p_id.font.color.rgb = RGBColor(255, 0, 0)
