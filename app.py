@@ -65,7 +65,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         # كارت 3
         {"img_left": Inches(5.45), "img_top": Inches(1.01), "name_left": Inches(5.20), "name_top": Inches(2.75), "id_left": Inches(5.94), "id_top": Inches(3.06)}, 
         # كارت 4
-        {"img_left": Inches(7.79), "img_top": Inches(1.01), "name_left": Inches(7.54), "name_top": Inches(2.75), "id_left": Inches(8.28), "id_top": Inches(3.06)}, 
+        {"img_left": Inches(7.79), "img_top": Inches(1.01), "name_left": Inches(7.54), "name_top": Inches(2.75), "id_left": Inches(8.28), "id_top": Inches(3.06)},  
         
         # ─────── الصف السفلي (الأسماء عند 6.40 والـ ID عند 6.71) ───────
         # كارت 5
@@ -79,34 +79,30 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
     ]
 
     current_slide = None
-    success_count = 0  # عداد تتابعي حقيقي للكروت المضافة لمنع الصفحات البيضاء والمربعات الرمادية
 
     for index, row in df.iterrows():
-        raw_id = str(row['ID']).strip()
-        emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
-        
-        # 🛑 تجاوز البيانات التي ليس لها صور فوراً بدون حجز كروت مفرغة
-        if emp_id not in images_dict:
-            continue
-            
-        card_index = success_count % 8
+        card_index = index % 8
         
         if card_index == 0:
             current_slide = prs.slides.add_slide(blank_layout)
             template_image_file.seek(0)
             current_slide.shapes.add_picture(template_image_file, Inches(0), Inches(0), width=prs.slide_width, height=prs.slide_height)
 
+        raw_id = str(row['ID']).strip()
+        emp_id = raw_id.split('.')[0] if '.' in raw_id else raw_id
+        
         full_name = str(row['Name']).strip().split()
         emp_name = " ".join(full_name[:2]) if len(full_name) >= 2 else " ".join(full_name)
         
         pos = card_positions[card_index]
         
         # 1. إسقاط صورة الموظف بالمقاس الصارم (1.7 × 1.22 بوصة)
-        img_file = images_dict[emp_id]
-        img_file.seek(0)
-        current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
+        if emp_id in images_dict:
+            img_file = images_dict[emp_id]
+            img_file.seek(0)
+            current_slide.shapes.add_picture(img_file, pos["img_left"], pos["img_top"], width=Inches(1.22), height=Inches(1.70))
         
-        # 2. إضافة صندوق الاسم (حجم 12 أزرق موسط ومتناسق وعرض 1.65 بوصة)
+        # 2. إضافة صندوق الاسم (حجم 14 أزرق موسط ومتناسق وعرض 1.65 بوصة كصورتك)
         txBox_name = current_slide.shapes.add_textbox(pos["name_left"], pos["name_top"], Inches(1.65), Inches(0.23))
         tf_name = txBox_name.text_frame
         tf_name.word_wrap = True
@@ -115,12 +111,12 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
-        p_name.font.size = Pt(12)  # تغيير الفونط لـ 12 منعاً للتداخل
+        p_name.font.size = Pt(12)
         p_name.font.bold = True
         p_name.font.name = 'Arial'
         p_name.font.color.rgb = RGBColor(0, 102, 204)
         
-        # 3. إضافة صندوق رقم الـ ID (حجم 12 أحمر وعرض 0.95 بوصة)
+        # 3. إضافة صندوق رقم الـ ID (حجم 14 أحمر يبدأ بدقة بعد نقطتي الـ :ID وعرض 0.95 بوصة كصورتك)
         txBox_id = current_slide.shapes.add_textbox(pos["id_left"], pos["id_top"], Inches(0.95), Inches(0.23))
         tf_id = txBox_id.text_frame
         tf_id.word_wrap = False
@@ -129,12 +125,10 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         p_id = tf_id.paragraphs[0]
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
-        p_id.font.size = Pt(12)  # تغيير الفونط لـ 12 منعاً للتداخل
+        p_id.font.size = Pt(14)
         p_id.font.bold = True
         p_id.font.name = 'Arial'
         p_id.font.color.rgb = RGBColor(255, 0, 0)
-        
-        success_count += 1
 
     output = BytesIO()
     prs.save(output)
