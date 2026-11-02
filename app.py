@@ -13,19 +13,19 @@ st.set_page_config(page_title="Xceed Print Generator", layout="centered")
 
 st.markdown("""
     <style>
-    /* /إخفاء زر Deploy والـ Fork/ */
+    /* إخفاء زر Deploy والـ Fork */
     .stAppDeployButton {
         display: none !important;
     }
-    /* /إخفاء القائمة العلوية النقاط الثلاث بالكامل/ */
+    /* إخفاء القائمة العلوية النقاط الثلاث بالكامل */
     #MainMenu {
         visibility: hidden !important;
     }
-    /* /إخفاء الهيدر الافتراضي لستريمليت/ */
+    /* إخفاء الهيدر الافتراضي لستريمليت */
     header {
         visibility: hidden !important;
     }
-    /* /إخفاء زر التقرير المزعج أسفل الصفحة/ */
+    /* إخفاء زر التقرير المزعج أسفل الصفحة */
     footer {
         visibility: hidden !important;
     }
@@ -108,12 +108,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         tf_name.word_wrap = True
         tf_name.margin_top = tf_name.margin_bottom = tf_name.margin_left = tf_name.margin_right = Inches(0)
         
-        # 🔒 فحص الأمان لضمان معالجة النص وضمان عدم سقوطه برمجياً داخل الباوربوينت
-        if len(tf_name.paragraphs) > 0:
-            p_name = tf_name.paragraphs[0]
-        else:
-            p_name = tf_name.add_paragraph()
-            
+        p_name = tf_name.paragraphs[0]
         p_name.text = emp_name
         p_name.alignment = PP_ALIGN.CENTER
         p_name.font.size = Pt(14)
@@ -127,12 +122,7 @@ def generate_cards(excel_file, uploaded_images, template_image_file):
         tf_id.word_wrap = False
         tf_id.margin_top = tf_id.margin_bottom = tf_id.margin_left = tf_id.margin_right = Inches(0)
         
-        # 🔒 فحص الأمان لضمان معالجة الـ ID وضمان عدم سقوطه برمجياً داخل الباوربوينت
-        if len(tf_id.paragraphs) > 0:
-            p_id = tf_id.paragraphs[0]
-        else:
-            p_id = tf_id.add_paragraph()
-            
+        p_id = tf_id.paragraphs[0]
         p_id.text = emp_id
         p_id.alignment = PP_ALIGN.LEFT
         p_id.font.size = Pt(14)
