@@ -1,0 +1,15 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    # سيقوم جيت هب بزيارة تطبيقك تلقائياً كل يوم الساعة 8 صباحاً بتوقيت مصر (6 صباحاً بتوقيت جرينتش)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # يتيح لك تشغيله يدوياً بأي وقت للتجربة
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send ping to Streamlit App
+        run: |
+          curl -I "https://streamlit.app"
