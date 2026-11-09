@@ -2,14 +2,14 @@ name: Keep Streamlit App Awake
 
 on:
   schedule:
-    # يعمل يومياً الساعة 8 صباحاً بتوقيت مصر (6 صباحاً بتوقيت جرينتش)
-    - cron: '0 6 * * *'
-  workflow_dispatch: # يتيح لك تشغيله يدوياً بأي وقت للتجربة
+    # يعمل يوميًا الساعة 7 صباحًا بتوقيت مصر (5 صباحًا بتوقيت جرينتش)
+    - cron: '0 5 * * *'
+  workflow_dispatch: 
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Send ping to Streamlit App
+      - name: Send ping to My Streamlit App
         run: |
-          curl -I "https://streamlit.app"
+          curl -I "https://xceed-card-generator-myi6rpwkcqphd4njlmx7lz.streamlit.app/"
