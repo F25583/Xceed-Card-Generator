@@ -2,14 +2,43 @@ name: Keep Streamlit App Awake
 
 on:
   schedule:
-    # يعمل يوميًا الساعة 7 صباحًا بتوقيت مصر (5 صباحًا بتوقيت جرينتش)
-    - cron: '0 5 * * *'
+    # يعمل مرتين يومياً: الساعة 7 صباحاً والساعة 7 مساءً بتوقيت مصر
+    - cron: '0 5,17 * * *'
   workflow_dispatch: 
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Send ping to My Streamlit App
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Playwright
         run: |
-          curl -I "https://xceed-card-generator-myi6rpwkcqphd4njlmx7lz.streamlit.app/"
+          npm install playwright
+          npx playwright install chromium
+
+      - name: Wake Up Streamlit App
+        run: |
+          node -e "
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
+            console.log('Navigating to Streamlit App...');
+            await page.goto('https://streamlit.app', { waitUntil: 'networkidle' });
+            
+            const wakeUpButton = await page.$('button:has-text(\"Yes, get this app back up!\")');
+            if (wakeUpButton) {
+                console.log('App is sleeping! Clicking wake up button...');
+                await wakeUpButton.click();
+                await page.waitForTimeout(45000); // إعطاء السيرفر 45 ثانية كاملة ليقوم قبل إغلاق المتصفح
+                console.log('App successfully waken up!');
+            } else {
+                console.log('App is already awake and active!');
+            }
+            await browser.close();
+          })();
+          "
